@@ -6,6 +6,7 @@ spec:
   workspaces:
     - name: pipeline-workspace
   params:
+    - name: app-name
     - name: build-image
     - name: repo-url
     - name: branch
@@ -73,9 +74,36 @@ spec:
 
     - name: deploy
       taskRef:
-        name: echo
+        name: openshift-client
+        kind: ClusterTask
       params:
-      - name: message
-        value: "Deploying $(params.branch) branch of $(params.repo-url) ..."
+      - name: SCRIPT
+        value: "oc create deploy $(params.app-name) --image=$(params.build-image)"
       runAfter:
         - build
+
+
+# Aplicar el pipeline
+# kubectl apply -f pipeline.yaml
+
+# Ejecutar el pipeline
+
+# tkn pipeline start cd-pipeline \
+  #  -p repo-url="https://github.com/ibm-developer-skills-network/wtecc-CICD_PracticeCode.git" \
+  # -p branch=main \
+  # -p app-name=hitcounter \
+  # -p build-image=image-registry.openshift-image-registry.svc:5000/$SN_ICR_NAMESPACE/tekton-lab:latest \
+  # -w name=pipeline-workspace,claimName=pipelinerun-pvc \
+  # --showlog
+
+# estatus del pipeline 
+# tkn pipelinerun ls
+
+
+# Logs del pipeline
+# tkn pipelinerun logs --last
+
+# verificar los despliegues
+# kubectl get all -l app=hitcounter
+
+
